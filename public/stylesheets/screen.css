@@ -322,6 +322,8 @@ tt {
   .comment .body {
     display: inline;
     font-size: 11px; }
+  .comment .content {
+    margin-left: 36px; }
   .comment tt {
     font-size: 10px;
     color: #666666; }
