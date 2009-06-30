@@ -3,13 +3,13 @@
 #   rake db:settings:load
 #
 :tabs: [
-  { :active : true,  :text : "Dashboard",     :url : "/"              },
-  { :active : false, :text : "Tasks",         :url : "/tasks"         },
-  { :active : false, :text : "Campaigns",     :url : "/campaigns"     },
-  { :active : false, :text : "Leads",         :url : "/leads"         },
-  { :active : false, :text : "Accounts",      :url : "/accounts"      },
-  { :active : false, :text : "Contacts",      :url : "/contacts"      },
-  { :active : false, :text : "Opportunities", :url : "/opportunities" }
+  { :active : true,  :text : "Dashboard",     :url : "/"              , :title : "Dashboard - Recent activity"},
+  { :active : false, :text : "Tasks",         :url : "/tasks"         , :title : "Tasks - Things that need to get done"},
+  { :active : false, :text : "Campaigns",     :url : "/campaigns"     , :title : "Campaigns - Marketing plans to generate leads and opportunities"},
+  { :active : false, :text : "Leads",         :url : "/leads"         , :title : "Leads - Prospects that may become an account and an opportunity"},
+  { :active : false, :text : "Accounts",      :url : "/accounts"      , :title : "Accounts - Existing company clients"},
+  { :active : false, :text : "Contacts",      :url : "/contacts"      , :title : "Contacts - Individual people"},
+  { :active : false, :text : "Opportunities", :url : "/opportunities" , :title : "Opportunities - Needs identified for accounts"}
 ]
 
 campaign_status:

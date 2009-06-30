@@ -2,7 +2,7 @@
   %ul
     - tabs.each do |tab|
       %li
-        = link_to(tab[:text], tab[:url], :class => tab[:active] ? "active" : "")
+        = link_to(tab[:text], tab[:url], :class => tab[:active] ? "active" : "", :title => tab[:title])
 = show_flash
 %table{ :width => "100%", :height => "100%", :cellpadding => 0, :cellspacing => 0, :class => :tabbed }
   %tr
