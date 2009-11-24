@@ -1,16 +1,15 @@
 # == Schema Information
-# Schema version: 17
+# Schema version: 23
 #
 # Table name: accounts
 #
 #  id               :integer(4)      not null, primary key
-#  uuid             :string(36)
 #  user_id          :integer(4)
 #  assigned_to      :integer(4)
 #  name             :string(64)      default(""), not null
 #  access           :string(8)       default("Private")
 #  website          :string(64)
-#  tall_free_phone  :string(32)
+#  toll_free_phone  :string(32)
 #  phone            :string(32)
 #  fax              :string(32)
 #  billing_address  :string(255)

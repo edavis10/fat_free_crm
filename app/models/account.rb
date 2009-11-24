@@ -1,16 +1,32 @@
+# Fat Free CRM
+# Copyright (C) 2008-2009 by Michael Dvorkin
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------------
+
 # == Schema Information
-# Schema version: 17
+# Schema version: 23
 #
 # Table name: accounts
 #
 #  id               :integer(4)      not null, primary key
-#  uuid             :string(36)
 #  user_id          :integer(4)
 #  assigned_to      :integer(4)
 #  name             :string(64)      default(""), not null
 #  access           :string(8)       default("Private")
 #  website          :string(64)
-#  tall_free_phone  :string(32)
+#  toll_free_phone  :string(32)
 #  phone            :string(32)
 #  fax              :string(32)
 #  billing_address  :string(255)
@@ -19,9 +35,9 @@
 #  created_at       :datetime
 #  updated_at       :datetime
 #
-
 class Account < ActiveRecord::Base
   belongs_to  :user
+  belongs_to  :assignee, :class_name => "User", :foreign_key => :assigned_to
   has_many    :account_contacts, :dependent => :destroy
   has_many    :contacts, :through => :account_contacts, :uniq => true
   has_many    :account_opportunities, :dependent => :destroy
@@ -29,9 +45,11 @@ class Account < ActiveRecord::Base
   has_many    :tasks, :as => :asset, :dependent => :destroy, :order => 'created_at DESC'
   has_many    :activities, :as => :subject, :order => 'created_at DESC'
 
-  simple_column_search :name, :match => :middle, :escape => lambda { |query| query.gsub(/[^\w\s\-]/, "").strip }
+  named_scope :created_by, lambda { |user| { :conditions => "user_id = #{user.id}" } }
+  named_scope :assigned_to, lambda { |user| { :conditions => "assigned_to = #{user.id}" } }
 
-  uses_mysql_uuid
+  simple_column_search :name, :match => :middle, :escape => lambda { |query| query.gsub(/[^\w\s\-\.']/, "").strip }
+
   uses_user_permissions
   acts_as_commentable
   acts_as_paranoid
@@ -57,7 +75,7 @@ class Account < ActiveRecord::Base
   def location
     return "" unless self[:billing_address]
     location = self[:billing_address].strip.split("\n").last
-    location.gsub(/(^|\s+)\d+(:?\s+|$)/, " ") if location
+    location.gsub(/(^|\s+)\d+(:?\s+|$)/, " ").strip if location
   end
 
   # Class methods.

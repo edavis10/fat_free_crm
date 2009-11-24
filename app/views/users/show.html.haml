@@ -1,55 +1,16 @@
 .title_tools
   - if @user == @current_user
-    = link_to("Edit profile", edit_user_path(@user)) + " | "
-    = link_to_function("Change password", %/alert("Not implemeneted yet.")/)
-.title Profile
-%p== Not implemented yet (#{@user.username} - #{@user.email})
-/ :erb
-/     / The following is for OpenID, if you are not using OpenID in your app remove
-/     / the OpenID if statement and field below.
-/
-/   <% if @user.openid_identifier.blank? %>
-/     <p>
-/       <b>Login:</b>
-/       <%=h @user.username %>
-/     </p>
-/   <% else %>
-/     <p>
-/       <b>OpenID:</b>
-/       <%=h @user.openid_identifier %>
-/     </p>
-/   <% end %>
-/   <p>
-/     <b>Email:</b>
-/     <%=h @user.email %>
-/   </p>
-/ 
-/   <p>
-/     <b>Login count:</b>
-/     <%=h @user.login_count %>
-/   </p>
-/ 
-/   <p>
-/     <b>Last request at:</b>
-/     <%=h @user.last_request_at %>
-/   </p>
-/ 
-/   <p>
-/     <b>Last login at:</b>
-/     <%=h @user.last_login_at %>
-/   </p>
-/ 
-/   <p>
-/     <b>Current login at:</b>
-/     <%=h @user.current_login_at %>
-/   </p>
-/ 
-/   <p>
-/     <b>Last login ip:</b>
-/     <%=h @user.last_login_ip %>
-/   </p>
-/ 
-/   <p>
-/     <b>Current login ip:</b>
-/     <%=h @user.current_login_ip %>
-/   </p>
+    = link_to_inline(:edit_profile, edit_user_path(@user), :text => "Edit profile") + " | "
+    = link_to_inline(:upload_avatar, avatar_user_path(@user), :text => "Upload picture") + " | "
+    = link_to_inline(:change_password, password_user_path(@user), :text => "Change password")
+.title#title= (@user == @current_user ? "My " : "") << "Profile"
+%div#edit_profile{ hidden }
+%div#upload_avatar{ hidden }
+%div#change_password{ hidden }
+
+.list#profile= render :partial => "user"
+
+= hook(:show_user_bottom, self)
+
+%iframe#uploading{ :name => "uploading", :style => "width:100px; height:10px; border:5px" }
+

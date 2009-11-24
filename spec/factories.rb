@@ -1,8 +1,21 @@
-require "faker"
+# Fat Free CRM
+# Copyright (C) 2008-2009 by Michael Dvorkin
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http:#www.gnu.org/licenses/>.
+#------------------------------------------------------------------------------
 
-Factory.sequence :uuid do |x|
-  "%08x-%04x-%04x-%04x-%012x" % [ rand(12345678), rand(1234), rand(1234), rand(1234), rand(123456789012) ]
-end
+require "faker"
 
 Factory.sequence :address do |x|
   Faker::Address.street_address + " " + Faker::Address.secondary_address + "\n"
@@ -31,13 +44,12 @@ end
 
 #----------------------------------------------------------------------------
 Factory.define :account do |a|
-  a.uuid                { Factory.next(:uuid) }
   a.user                { |a| a.association(:user) } 
   a.assigned_to         nil
   a.name                { Faker::Company.name }
   a.access              "Public"
   a.website             { Factory.next(:website) }
-  a.tall_free_phone     { Faker::PhoneNumber.phone_number }
+  a.toll_free_phone     { Faker::PhoneNumber.phone_number }
   a.phone               { Faker::PhoneNumber.phone_number }
   a.fax                 { Faker::PhoneNumber.phone_number }
   a.billing_address     { Factory.next(:address) }
@@ -77,8 +89,18 @@ Factory.define :activity do |a|
 end
 
 #----------------------------------------------------------------------------
+Factory.define :avatar do |a|
+  a.user                { |a| a.association(:user) }
+  a.entity              { raise "Please specify :entity for the avatar" }
+  a.image_file_size     nil
+  a.image_file_name     nil
+  a.image_content_type  nil
+  a.updated_at          { Factory.next(:time) }
+  a.created_at          { Factory.next(:time) }
+end
+
+#----------------------------------------------------------------------------
 Factory.define :campaign do |c|
-  c.uuid                { Factory.next(:uuid) }
   c.user                { |a| a.association(:user) }
   c.name                { Faker::Lorem.sentence[0..63] }
   c.assigned_to         nil
@@ -112,7 +134,6 @@ end
 
 #----------------------------------------------------------------------------
 Factory.define :contact do |c|
-  c.uuid                { Factory.next(:uuid) }
   c.user                { |a| a.association(:user) }
   c.lead                { |a| a.association(:lead) }
   c.assigned_to         nil
@@ -152,7 +173,6 @@ end
 
 #----------------------------------------------------------------------------
 Factory.define :lead do |l|
-  l.uuid                { Factory.next(:uuid) }
   l.user                { |a| a.association(:user) }
   l.campaign            { |a| a.association(:campaign) }
   l.assigned_to         nil
@@ -182,7 +202,6 @@ end
 
 #----------------------------------------------------------------------------
 Factory.define :opportunity do |o|
-  o.uuid                { Factory.next(:uuid) }
   o.user                { |a| a.association(:user) }
   o.campaign            { |a| a.association(:campaign) }
   o.assigned_to         nil
@@ -227,7 +246,6 @@ end
 
 #----------------------------------------------------------------------------
 Factory.define :task do |t|
-  t.uuid                { Factory.next(:uuid) }
   t.user                { |a| a.association(:user) }
   t.asset_id            nil
   t.asset_type          nil
@@ -246,7 +264,6 @@ end
 
 #----------------------------------------------------------------------------
 Factory.define :user do |u|
-  u.uuid                { Factory.next(:uuid) }
   u.username            { Factory.next(:username) }
   u.email               { Faker::Internet.email }
   u.first_name          { Faker::Name.first_name }
@@ -260,11 +277,11 @@ Factory.define :user do |u|
   u.yahoo               nil
   u.google              nil
   u.skype               nil
+  u.admin               false
   u.password_hash       "56d91c9f1a9c549304768982fd4e2d8bc2700b403b4524c0f14136dbbe2ce4cd923156ad69f9acce8305dba4e63faa884e61fb7a256cf8f5fc7c2ce176e68e8f"
   u.password_salt       "ce6e0200c96f4dd326b91f3967115a31421a0e7dcddc9ffb63a77f598a9fcb5326fe532dbd9836a2446e46840d398fa32c81f8f4da1a0fcfe931989e9639a013"
-  u.remember_token      "d7cdeffd3625f7cb265b21126b85da7c930d47c4a708365c20eb857560055a6b57c9775becb8a957dfdb46df8aee17eb120a011b380e9cc0882f9dfaa2b7ba26"
+  u.persistence_token   "d7cdeffd3625f7cb265b21126b85da7c930d47c4a708365c20eb857560055a6b57c9775becb8a957dfdb46df8aee17eb120a011b380e9cc0882f9dfaa2b7ba26"
   u.perishable_token    "TarXlrOPfaokNOzls2U8"
-  u.openid_identifier   nil
   u.last_request_at     { Factory.next(:time) }
   u.current_login_at    { Factory.next(:time) }
   u.last_login_at       { Factory.next(:time) }
@@ -274,8 +291,14 @@ Factory.define :user do |u|
   u.deleted_at          nil
   u.updated_at          { Factory.next(:time) }
   u.created_at          { Factory.next(:time) }
+  u.suspended_at        nil
   u.password              "password"
   u.password_confirmation "password"
+end
+
+#----------------------------------------------------------------------------
+Factory.define :admin, :class => User do |u|
+  u.admin               true
 end
 
 # Load default settings from config/settings.yml file.

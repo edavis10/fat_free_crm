@@ -1,9 +1,27 @@
+# Fat Free CRM
+# Copyright (C) 2008-2009 by Michael Dvorkin
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------------
+
 class ApplicationController < ActionController::Base
-  helper :all
-  helper_method :current_user_session, :current_user
+  helper(application_helpers)
+  helper_method :current_user_session, :current_user, :can_signup?
   helper_method :called_from_index_page?, :called_from_landing_page?
 
   filter_parameter_logging :password, :password_confirmation
+  before_filter :set_context
   before_filter "hook(:app_before_filter, self)"
   after_filter "hook(:app_after_filter, self)"
 
@@ -13,30 +31,38 @@ class ApplicationController < ActionController::Base
 
   private
   #----------------------------------------------------------------------------
-  def set_current_tab(tab = controller_name.to_sym)
+  def set_context
+    ActiveSupport::TimeZone[session[:timezone_offset]] if session[:timezone_offset]
+    ActionMailer::Base.default_url_options[:host] = request.host_with_port
+  end
+
+  #----------------------------------------------------------------------------
+  def set_current_tab(tab = controller_name)
     @current_tab = tab
   end
 
   #----------------------------------------------------------------------------
   def current_user_session
     @current_user_session ||= Authentication.find
+    if @current_user_session && @current_user_session.record.suspended?
+      @current_user_session = nil
+    end
+    @current_user_session
   end
   
   #----------------------------------------------------------------------------
   def current_user
     @current_user ||= (current_user_session && current_user_session.record)
+    User.current_user = @current_user
   end
   
   #----------------------------------------------------------------------------
   def require_user
-    if current_user
-      # TODO: add timezone to user profile (f.time_zone_select :time_zone, TimeZone.us_zones)
-      # Time.zone = @current_user.time_zone
-    else
+    unless current_user
       store_location
       flash[:notice] = "You must be logged in to access this page." if request.request_uri != "/"
       redirect_to login_url
-      return false
+      false
     end
   end
 
@@ -46,7 +72,7 @@ class ApplicationController < ActionController::Base
       store_location
       flash[:notice] = "You must be logged out to access this page."
       redirect_to profile_url
-      return false
+      false
     end
   end
   
@@ -59,6 +85,11 @@ class ApplicationController < ActionController::Base
   def redirect_back_or_default(default)
     redirect_to(session[:return_to] || default)
     session[:return_to] = nil
+  end
+
+  #----------------------------------------------------------------------------
+  def can_signup?
+    [ :allowed, :needs_approval ].include? Setting.user_signup
   end
 
   #----------------------------------------------------------------------------
@@ -87,8 +118,8 @@ class ApplicationController < ActionController::Base
   def respond_to_not_found(*types)
     asset = self.controller_name.singularize
     flick = case self.action_name
-      when "destroy": "delete"
-      when "promote": "convert"
+      when "destroy" then "delete"
+      when "promote" then "convert"
       else self.action_name
     end
     if self.action_name == "show"
@@ -120,7 +151,12 @@ class ApplicationController < ActionController::Base
   #----------------------------------------------------------------------------
   def auto_complete
     @query = params[:auto_complete_query]
-    @auto_complete = self.controller_name.classify.constantize.my(:user => @current_user, :limit => 10).search(@query)
+    @auto_complete = hook(:auto_complete, self, :query => @query, :user => @current_user)
+    if @auto_complete.empty?
+      @auto_complete = self.controller_name.classify.constantize.my(:user => @current_user, :limit => 10).search(@query)
+    else
+      @auto_complete = @auto_complete.last
+    end
     session[:auto_complete] = self.controller_name.to_sym
     render :template => "common/auto_complete", :layout => nil
   end

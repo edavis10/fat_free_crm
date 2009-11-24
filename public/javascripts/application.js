@@ -1,9 +1,27 @@
+// Fat Free CRM
+// Copyright (C) 2008-2009 by Michael Dvorkin
+// 
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+// 
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//------------------------------------------------------------------------------
+
 var crm = {
 
-  EXPANDED:  "&#9660;",
-  COLLAPSED: "&#9658;",
-  request: null,
-  autocompleter: null,
+  EXPANDED      :  "&#9660;",
+  COLLAPSED     : "&#9658;",
+  request       : null,
+  autocompleter : null,
+  base_url      : "",
 
   //----------------------------------------------------------------------------
   date_select_popup: function(id, dropdown_id) {
@@ -171,9 +189,9 @@ var crm = {
 
   //----------------------------------------------------------------------------
   flip_subtitle: function(el) {
-    var arrow = el.down("small");
-    var intro = el.up().next().down("small");
-    var section = el.up().next().down("div");
+    var arrow = Element.down(el, "small");
+    var intro = Element.down(Element.next(Element.up(el)), "small");
+    var section = Element.down(Element.next(Element.up(el)), "div");
 
     if (Element.visible(section)) {
       arrow.update(this.COLLAPSED);
@@ -204,25 +222,34 @@ var crm = {
   },
 
   //----------------------------------------------------------------------------
-  flash: function(id, sticky) {
-    $(id).hide();
-    Effect.Appear(id, { duration: 0.5 });
+  flash: function(type, sticky) {
+    $("flash").hide();
+    if (type == "warning" || type == "error") {
+      $("flash").className = "flash_warning";
+    } else {
+      $("flash").className = "flash_notice";
+    }
+    Effect.Appear("flash", { duration: 0.5 });
     if (!sticky) {
-      setTimeout("Effect.Fade('" + id + "')", 3000);
+      setTimeout("Effect.Fade('flash')", 3000);
     }
   },
 
   //----------------------------------------------------------------------------
   search: function(query, controller) {
     if (!this.request) {
+      var list = controller;          // ex. "users"
+      if (list.indexOf("/") >= 0) {   // ex. "admin/users"
+        list = list.split("/")[1];
+      }
       $("loading").show();
-      $(controller).setStyle({ opacity: 0.4 });
-      new Ajax.Request("/" + controller + "/search", {
+      $(list).setStyle({ opacity: 0.4 });
+      new Ajax.Request(this.base_url + "/" + controller + "/search", {
         method     : "get",
         parameters : { query : query },
         onSuccess  : function() {
           $("loading").hide();
-          $(controller).setStyle({ opacity: 1 });
+          $(list).setStyle({ opacity: 1 });
         },
         onComplete : (function() { this.request = null; }).bind(this)
       });
@@ -248,16 +275,16 @@ var crm = {
       Event.stopObserving(this.autocompleter.element);
       delete this.autocompleter;
     }
-    this.autocompleter = new Ajax.Autocompleter("auto_complete_query", "auto_complete_dropdown", "/" + controller + "/auto_complete", { 
+    this.autocompleter = new Ajax.Autocompleter("auto_complete_query", "auto_complete_dropdown", this.base_url + "/" + controller + "/auto_complete", { 
       frequency: 0.25,
       afterUpdateElement: function(text, el) {
         if (el.id) {  // found: redirect to #show
-          window.location.href = "/" + controller + "/" + escape(el.id);
+          window.location.href = this.base_url + "/" + controller + "/" + escape(el.id);
         } else {      // not found: refresh current page
           $("auto_complete_query").value = "";
           window.location.href = window.location.href;
         }
-      }
+      }.bind(this)    // binding for this.base_url
     });
     $("auto_complete_dropdown").update("");
     $("auto_complete_query").value = "";

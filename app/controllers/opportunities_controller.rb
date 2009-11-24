@@ -1,3 +1,20 @@
+# Fat Free CRM
+# Copyright (C) 2008-2009 by Michael Dvorkin
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------------
+
 class OpportunitiesController < ApplicationController
   before_filter :require_user
   before_filter :set_current_tab, :only => [ :index, :show ]
@@ -84,6 +101,8 @@ class OpportunitiesController < ApplicationController
         if called_from_index_page?
           @opportunities = get_opportunities
           get_data_for_sidebar
+        else
+          get_data_for_sidebar(:campaign)
         end
         format.js   # create.js.rjs
         format.xml  { render :xml => @opportunity, :status => :created, :location => @opportunity }
@@ -115,7 +134,11 @@ class OpportunitiesController < ApplicationController
 
     respond_to do |format|
       if @opportunity.update_with_account_and_permissions(params)
-        get_data_for_sidebar if called_from_index_page?
+        if called_from_index_page?
+          get_data_for_sidebar
+        else
+          get_data_for_sidebar(:campaign)
+        end
         format.js
         format.xml  { head :ok }
       else
@@ -211,6 +234,11 @@ class OpportunitiesController < ApplicationController
       :per_page => @current_user.pref[:opportunities_per_page]
     }
 
+    # Call :get_opportunities hook and return its output if any.
+    opportunities = hook(:get_opportunities, self, :records => records, :pages => pages)
+    return opportunities.last unless opportunities.empty?
+
+    # Default processing if no :get_opportunities hooks are present.
     if session[:filter_by_opportunity_stage]
       filtered = session[:filter_by_opportunity_stage].split(",")
       current_query.blank? ? Opportunity.my(records).only(filtered) : Opportunity.my(records).only(filtered).search(current_query)
@@ -231,6 +259,7 @@ class OpportunitiesController < ApplicationController
         end
       else # Called from related asset.
         self.current_page = 1
+        @campaign = @opportunity.campaign # Reload related campaign if any.
       end
       # At this point render destroy.js.rjs
     else
@@ -241,14 +270,18 @@ class OpportunitiesController < ApplicationController
   end
 
   #----------------------------------------------------------------------------
-  def get_data_for_sidebar
-    load_settings
-    @opportunity_stage_total = { :all => Opportunity.my(@current_user).count, :other => 0 }
-    @stage.keys.each do |key|
-      @opportunity_stage_total[key] = Opportunity.my(@current_user).count(:conditions => [ "stage=?", key.to_s ])
-      @opportunity_stage_total[:other] -= @opportunity_stage_total[key]
+  def get_data_for_sidebar(related = false)
+    if related
+      instance_variable_set("@#{related}", @opportunity.send(related)) if called_from_landing_page?(related.to_s.pluralize)
+    else
+      load_settings
+      @opportunity_stage_total = { :all => Opportunity.my(@current_user).count, :other => 0 }
+      @stage.keys.each do |key|
+        @opportunity_stage_total[key] = Opportunity.my(@current_user).count(:conditions => [ "stage=?", key.to_s ])
+        @opportunity_stage_total[:other] -= @opportunity_stage_total[key]
+      end
+      @opportunity_stage_total[:other] += @opportunity_stage_total[:all]
     end
-    @opportunity_stage_total[:other] += @opportunity_stage_total[:all]
   end
 
   #----------------------------------------------------------------------------

@@ -1,10 +1,29 @@
-# Methods added to this helper will be available to all templates in the application.
+# Fat Free CRM
+# Copyright (C) 2008-2009 by Michael Dvorkin
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------------
+
 module ApplicationHelper
 
-  #-------------------------------------------------------------------
-  def tabs
-    @current_tab ||= :home
-    Setting[:tabs].each { |tab| tab[:active] = (tab[:text].downcase.to_sym == @current_tab) }
+  def tabs(tabs = FatFreeCRM::Tabs.main)
+    if tabs
+      @current_tab ||= tabs.first[:text].downcase.to_sym # Select first tab by default.
+      tabs.each { |tab| tab[:active] = (@current_tab == tab[:text].downcase || @current_tab == tab[:url][:controller]) }
+    else
+      raise RuntimeError.new("Tab settings are missing, please run 'rake crm:setup'")
+    end
   end
   
   #----------------------------------------------------------------------------
@@ -13,16 +32,16 @@ module ApplicationHelper
     ((controller.controller_name == "users") && (%w(create new).include?(controller.action_name)))
   end
 
+  # Show existing flash or embed hidden paragraph ready for flash[:notice]
   #----------------------------------------------------------------------------
-  def show_flash(options = { :container => nil, :sticky => false })
+  def show_flash(options = { :sticky => false })
     [:error, :warning, :info, :notice].each do |type|
       if flash[type]
-        id = "flash_#{type}"
-        html = content_tag(:p, h(flash[type]), :class => "flash_#{type}", :id => (options[:container] ? nil : id))
-        return html << content_tag(:script, "crm.flash('#{options[:container] || id}', #{options[:sticky]})", :type => "text/javascript")
+        html = content_tag(:p, h(flash[type]), :id => "flash")
+        return html << content_tag(:script, "crm.flash('#{type}', #{options[:sticky]})", :type => "text/javascript")
       end
     end
-    nil
+    content_tag(:p, nil, :id => "flash", :style => "display:none;")
   end
 
   #----------------------------------------------------------------------------
@@ -111,6 +130,11 @@ module ApplicationHelper
   def visible;   { :style => "visibility:visible;" }; end
 
   #----------------------------------------------------------------------------
+  def one_submit_only(form)
+    { :onsubmit => "$('#{form}_submit').disabled = true" }
+  end
+
+  #----------------------------------------------------------------------------
   def hidden_if(you_ask)
     you_ask ? hidden : exposed
   end
@@ -156,13 +180,18 @@ module ApplicationHelper
     distance_of_time_in_words(Time.now, whenever) << " ago"
   end
 
+  # Reresh sidebar using the action view within the current controller.
   #----------------------------------------------------------------------------
   def refresh_sidebar(action = nil, shake = nil)
+    refresh_sidebar_for(controller.controller_name, action, shake)
+  end
+
+  # Refresh sidebar using the action view within an arbitrary controller.
+  #----------------------------------------------------------------------------
+  def refresh_sidebar_for(view, action = nil, shake = nil)
     update_page do |page|
-      page[:sidebar].replace_html :partial => "layouts/sidebar", :locals => { :action => action }
-      if shake
-        page[shake].visual_effect :shake, :duration => 0.4, :distance => 3
-      end
+      page[:sidebar].replace_html :partial => "layouts/sidebar", :locals => { :view => view, :action => action }
+      page[shake].visual_effect(:shake, :duration => 0.4, :distance => 3) if shake
     end
   end
 
@@ -172,6 +201,7 @@ module ApplicationHelper
     [ :blog, :linkedin, :facebook, :twitter ].inject([]) do |links, site|
       url = person.send(site)
       unless url.blank?
+        url = "http://" << url unless url.match(/^https?:\/\//)
         links << link_to(image_tag("#{site}.gif", :size => "15x15"), url, :popup => true, :title => "Open #{url} in a new window")
       end
       links
@@ -188,6 +218,49 @@ module ApplicationHelper
       :loading   => "$('#{option}').update('#{value}'); $('loading').show()",
       :complete  => "$('loading').hide()"
     )
+  end
+
+  # Ajax helper to pass browser timezone offset to the server.
+  #----------------------------------------------------------------------------
+  def get_browser_timezone_offset
+    unless session[:timezone_offset]
+      remote_function(
+        :url  => url_for(:controller => :home, :action => :timezone),
+        :with => "{ offset: (new Date()).getTimezoneOffset() }"
+      )
+    end
+  end
+
+  #----------------------------------------------------------------------------
+  def activate_facebox
+    %Q/document.observe("dom:loaded", function() { new Facebox('#{Setting.base_url}'); });/
+  end
+
+  # Users can upload their avatar, and if it's missing we're going to use
+  # gravatar. For leads and contacts we always use gravatars.
+  #----------------------------------------------------------------------------
+  def avatar_for(model, args = {})
+    args[:size]  ||= "75x75"
+    args[:class] ||= "gravatar"
+    if model.avatar
+      image_tag(model.avatar.image.url(Avatar.styles[args[:size]]), args)
+    elsif model.email
+      gravatar(model.email, { :default => default_avatar_url }.merge(args))
+    else
+      image_tag("avatar.jpg", args)
+    end
+  end
+
+  # Add default avatar image and invoke original :gravatar_for defined by the
+  # gravatar plugin (see vendor/plugins/gravatar/lib/gravatar.rb)
+  #----------------------------------------------------------------------------
+  def gravatar_for(model, args = {})
+    super(model, { :default => default_avatar_url }.merge(args))
+  end
+
+  #----------------------------------------------------------------------------
+  def default_avatar_url
+    "#{request.protocol + request.host_with_port}" + Setting.base_url.to_s + "/images/avatar.jpg"
   end
 
 end

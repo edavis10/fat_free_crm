@@ -81,6 +81,7 @@
     height: 30px; }
 
 .tools {
+  font-size: 10px;
   float: right;
   padding: 0px 0px 0px 4px; }
 
@@ -148,6 +149,15 @@
 .urgent {
   color: darkred; }
 
+.black {
+  color: black; }
+
+.white {
+  color: white !important; }
+
+.grayed {
+  color: silver; }
+
 .strip {
   background: gainsboro;
   color: black;
@@ -161,6 +171,18 @@
   -moz-border-radius-bottomleft: 7px;
   -webkit-border-top-left-radius: 7px;
   -webkit-border-bottom-left-radius: 7px; }
+
+.indent {
+  margin-left: 88px; }
+
+.indentslim {
+  margin-left: 38px; }
+
+.indentwide {
+  margin-left: 106px; }
+
+.indentfull {
+  margin-left: 126px; }
 
 .bucket {
   margin: 0px 0px 10px 0px; }
@@ -182,10 +204,11 @@
     width: 500px; }
   .comment textarea {
     font-size: 11px;
-    height: 30px;
+    height: 110px;
     padding: 3px;
     width: 500px; }
   .comment .gravatar {
+    background: #f2f2f2;
     float: left;
     padding: 0px 10px 5px 0px; }
   .comment .body {
@@ -195,7 +218,8 @@
     font-size: 10px;
     color: #666666; }
   .comment dt {
-    padding: 0px; }
+    padding: 0px;
+    margin: -10px 0px 0px 36px; }
 
 #paginate {
   float: right;
@@ -205,6 +229,13 @@
 #paging {
   float: right;
   margin: 7px 5px 0px 0px; }
+
+.confirm {
+  background: #cdfecd;
+  border-left: 10px palegreen solid;
+  font-size: 11px;
+  margin: 0px 0px 6px 0px;
+  padding: 6px; }
 
 .log {
   padding: 8px 0px 0px 0px; }
@@ -245,14 +276,14 @@
     padding: 6px 0px 6px 0px; }
     .list li .gravatar {
       float: left;
-      padding: 0px 8px 5px 0px; }
+      padding: 0px 8px 0px 0px; }
     .list li tt {
       color: dimgray;
       font-size: 11px; }
     .list li dt {
       color: #3f3f3f;
       font-size: 11px;
-      padding: 2px 0px 0px 88px; }
+      padding: 2px 0px 0px 0px; }
     .list li dt a:link, .list li dt a:visited {
       color: #3f3f3f;
       font-weight: bold;

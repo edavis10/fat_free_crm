@@ -1,10 +1,26 @@
+# Fat Free CRM
+# Copyright (C) 2008-2009 by Michael Dvorkin
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------------
+
 # == Schema Information
-# Schema version: 17
+# Schema version: 23
 #
 # Table name: opportunities
 #
 #  id          :integer(4)      not null, primary key
-#  uuid        :string(36)
 #  user_id     :integer(4)
 #  campaign_id :integer(4)
 #  assigned_to :integer(4)
@@ -20,7 +36,6 @@
 #  created_at  :datetime
 #  updated_at  :datetime
 #
-
 class Opportunity < ActiveRecord::Base
   belongs_to  :user
   belongs_to  :account
@@ -32,17 +47,18 @@ class Opportunity < ActiveRecord::Base
   has_many    :contacts, :through => :contact_opportunities, :uniq => true, :order => "contacts.id DESC"
   has_many    :tasks, :as => :asset, :dependent => :destroy, :order => 'created_at DESC'
   has_many    :activities, :as => :subject, :order => 'created_at DESC'
+
   named_scope :only, lambda { |filters| { :conditions => [ "stage IN (?)" + (filters.delete("other") ? " OR stage IS NULL" : ""), filters ] } }
+  named_scope :created_by, lambda { |user| { :conditions => "user_id = #{user.id}" } }
+  named_scope :assigned_to, lambda { |user| { :conditions => "assigned_to = #{user.id}" } }
 
-  simple_column_search :name, :match => :middle, :escape => lambda { |query| query.gsub(/[^\w\s\-]/, "").strip }
+  simple_column_search :name, :match => :middle, :escape => lambda { |query| query.gsub(/[^\w\s\-\.']/, "").strip }
 
-  uses_mysql_uuid
   uses_user_permissions
   acts_as_commentable
   acts_as_paranoid
 
   validates_presence_of :name, :message => "^Please specify the opportunity name."
-  validates_uniqueness_of :name, :scope => :user_id
   validates_numericality_of [ :probability, :amount, :discount ], :allow_nil => true
   validate :users_for_shared_access
 

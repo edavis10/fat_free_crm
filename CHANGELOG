@@ -4,6 +4,430 @@ It does not matter how slowly you go as long as you do not stop.
 First they ignore you, then they laugh at you, then they fight you,
 then you win. –- Mahatma Gandhi
 
+
+Mon, Nov 16, 2009
+---------------------------------------------------------------------
+- Streamlined CSS styles to fix text wrapping.
+- Added explicit CSS value to fix tabs height (thanks, Apirak!)
+- Fixed time calculations for dashboard activities.
+
+Fri, Nov 6, 2009
+---------------------------------------------------------------------
+- Adjust total campaign revenue when related opportunity is won (LH #121).
+- Refresh campaign sidebar when updating related opportunity (LH #121).
+- Refresh campaign sidebar when rejecting or converting related lead (LH #121).
+- Display newly created opportunity when converting lead from campaign page (LH #121).
+
+Thu, Nov 5, 2009
+---------------------------------------------------------------------
+- Writing specs for LH #121.
+
+Wed, Nov 4, 2009
+---------------------------------------------------------------------
+- Correctly set opportunity campaign and source when converting a lead (LH #119).
+- Show correct campaign name and source when adding a lead from campaign landing page.
+- Update lead counters when reassigning leads between campaigns (LH #117).
+
+Sat, Oct 31, 2009
+---------------------------------------------------------------------
+- Correctly show opportunity summary when opportunity stage hasn't been specified.
+- Update Campaign summary when creating or deleting related lead or opportunity.
+- Fixed "rake crm:setup" task to be compatible with ruby 1.9.
+
+Fri, Oct 30, 2009
+---------------------------------------------------------------------
+- Introduced Sortable module, more work on I18n.
+
+Sat, Oct 24, 2009
+---------------------------------------------------------------------
+- Allow renaming both main and admin tabs (see config/settings.yml).
+- Refactored gravatars to always show default image if gravatar is missing.
+- Fixed Facebox usage within Admin area.
+- Release 0.9.8a.
+
+Thu, Oct 22, 2009
+---------------------------------------------------------------------
+- Fixed SASS deprecation warnings making it compatible with Heroku again (thanks, Jim!).
+- Refactored Facebox library (again!) to take into account [base_url] setting.
+
+Wed, Oct 21, 2009
+---------------------------------------------------------------------
+- Include modules from "lib/fat_free_crm.rb" so that they're loaded when running rake.
+
+Tue, Oct 20, 2009
+---------------------------------------------------------------------
+- Added Language option stubs to user's profile.
+- Disabled tab highlighting when showing user's profile.
+
+Sun, Oct 18, 2009
+---------------------------------------------------------------------
+- Merged localization commits onto i18n branch (thanks, Lana!)
+
+Wed, Oct 14, 2009
+---------------------------------------------------------------------
+- Make sure opportunity name does not exceed 64 characters (thanks, Rit!)
+- Changed required Rails version to v2.3.4
+- Updated model annotations for schema version #023.
+- Release 0.9.8.
+
+Sun, Oct 11, 2009
+---------------------------------------------------------------------
+- Added full support for deploying Fat Free CRM in subdirectory (see config/settings.yml).
+- Made Facebox library work with the project is deployed in subdirectory.
+
+Sat, Oct 10, 2009
+---------------------------------------------------------------------
+- Happy birthday, Diana!
+- Setting up Apache with the latest Passenger.
+
+Fri, Oct 9, 2009
+---------------------------------------------------------------------
+- Prevent multiple form submissions by pressing [Submit] button twice.
+- Fixed apparent MySQL migration error on Windows/XP.
+
+Wed, Oct 7, 2009
+---------------------------------------------------------------------
+- Moved [uses_user_permission] code from plugin to core library.
+- Added inspector logging.
+
+Mon, Oct 5, 2009
+---------------------------------------------------------------------
+- Added [rake crm:hooks] task that enumerates the hooks (thanks, Eric!)
+
+Sat, Oct 3, 2009
+---------------------------------------------------------------------
+- Removed [uses_mysql_uuid] plugin and deprecated support for UUIDs.
+
+Tue, Sep 29, 2009
+---------------------------------------------------------------------
+- Adjusted activity timestamp to reflect UTC offset (thanks, Andrew!)
+- Allow creating opportunities with non-unique name.
+- Added :auto_complete controller hook.
+
+Sun, Sep 27, 2009
+---------------------------------------------------------------------
+- Added sidebar hooks on asset landing pages.
+- crm_tags: added support for showing tags on asset landing pages.
+
+Sat, Sep 26, 2009
+---------------------------------------------------------------------
+- Added hooks for inline CSS styles and JavaScript epilogue.
+- crm_tags: added JavaScript and CSS stylesheets for tags.
+- crm_tags: make sure tags stay unique when searching.
+
+Thu, Sep 24, 2009
+---------------------------------------------------------------------
+- crm_tags: Made controller methods work with query string that contains tags.
+
+Tue, Sep 22, 2009
+---------------------------------------------------------------------
+- crm_tags: Proof of concept of combining query string with hash-prefixed tags.
+
+Mon, Sep 21, 2009
+---------------------------------------------------------------------
+- Added hooks to model view partials.
+
+Mon, Sep 21, 2009
+---------------------------------------------------------------------
+- Added hooks to model view partials.
+
+Sun, Sep 20, 2009
+---------------------------------------------------------------------
+- More work on [crm_tags] plugin.
+
+Fri, Sep 18, 2009
+---------------------------------------------------------------------
+- Merged String#to_url (thanks, Rit!)
+
+Thu, Sep 17, 2009
+---------------------------------------------------------------------
+- Fixed task completion bug for tasks with specific due date (thanks, Andrew!)
+- Added more task model specs.
+
+Mon, Sep 14, 2009
+---------------------------------------------------------------------
+- Merged in Andrew's patch that solves disappearing tasks puzzle (thanks, Andrew!)
+- Created task model specs that prove Andrew's theory.
+
+Sun, Sep 13, 2009
+---------------------------------------------------------------------
+- Added [get_*] controller hooks.
+- Refactored FatFreeCRM::Callback.hook to simplify and support hook chains.
+- Implemented controller hooks in [crm_tags] plugin.
+
+Sat, Sep 12, 2009
+---------------------------------------------------------------------
+- Added [*_top_section_bottom] view hooks.
+- Make Rails not to reload core classes when developing a plugin.
+
+Thu, Sep 10, 2009
+---------------------------------------------------------------------
+- More work on [crm_tags] plugin and its view hooks.
+
+Wed, Sep 9, 2009
+---------------------------------------------------------------------
+- Injecting [acts_as_taggable_on] to existing models.
+
+Mon, Sep 7, 2009
+---------------------------------------------------------------------
+- Started with [crm_tags] plugin.
+
+Sun, Sep 6, 2009
+---------------------------------------------------------------------
+- Release 0.9.7.
+- Open up [Quick find] on click rather than on mouseover.
+- Added bounce effect to the login screen (fun!).
+- Added CONTRIBUTORS file.
+
+Sat, Sep 5, 2009
+---------------------------------------------------------------------
+- Added overlay to the facebox library.
+- Upgraded Rails Engines plugin (edge 2009-06-16).
+- Boot Rails Engines right after Rails boots itself up.
+
+Thu, Sep 3, 2009
+---------------------------------------------------------------------
+- Make sure [rake crm:setup:admin] can actually assign admin attribute (thanks Rit!)
+- Correctly assign and revoke admin rights in Admin/Users (thanks Rit!)
+- Refactored Tabs code to avoid duplication.
+
+Tue, Sep 1, 2009
+---------------------------------------------------------------------
+- Fixed user signup vulnerability (thanks, Rit!)
+- Suppress terminal echo when asking for admin password in [rake crm:setup:admin] task.
+
+Sun, Aug 30, 2009
+---------------------------------------------------------------------
+- Get flip_subtitle working in IE8 (thanks, Hamish!)
+- Make sure simple_column_search does not escape period and single quote (thanks, Rit!)
+- Don't suspend Admin users (thanks, Rit!)
+- Moved [crm_sample_tabs] plugin into separate repository.
+- Merged plugin tab support into the master branch.
+
+Sat, Aug 29, 2009
+---------------------------------------------------------------------
+- Some refactoring and more comments explaining the examples in [crm_sample_plugin].
+
+Thu, Aug 27, 2009
+---------------------------------------------------------------------
+- Make sure we can run Rake tasks when Settings are missing.
+- Reload User class in [rake crm:setup] task to make sure migration attributes are set.
+- Make sure the user has been authenticated before checking whether she is awaiting approval.
+
+Wed, Aug 26, 2009
+---------------------------------------------------------------------
+- Implemented #tab method for plugin registration.
+
+Tue, Aug 25, 2009
+---------------------------------------------------------------------
+- Added [crm_sample_tabs] plugin with the tab registration prototype.
+
+Mon, Aug 24, 2009
+---------------------------------------------------------------------
+- Implemented user approvals in Admin/Users and closed LH #29.
+- Release 0.9.6.
+
+Sat, Aug 22, 2009
+---------------------------------------------------------------------
+- Implemented :needs_approval setting for user signups.
+
+Fri, Aug 21, 2009
+---------------------------------------------------------------------
+- Added new :user_signup setting (see config/settings.yml).
+- User signups are only allowed if :user_signup is set to :allowed or :needs_approval.
+
+Thu, Aug 20, 2009
+---------------------------------------------------------------------
+- Added support for unattended [rake crm:setup] and [rake crm:setup:admin] tasks.
+- Warn about database reset in [rake crm:setup] task.
+- Removed dependency on Highline gem and removed it from vendors/gems.
+- Added [:user_signup] setting and started with the signup permissions.
+
+Wed, Aug 19, 2009
+---------------------------------------------------------------------
+- Added view hooks on landing pages of all major models.
+
+Tue, Aug 18, 2009
+---------------------------------------------------------------------
+- More work on [crm_issues] plugin.
+
+Mon, Aug 17, 2009
+---------------------------------------------------------------------
+- Work on [crm_issues] plugin.
+
+Sat, Aug 15, 2009
+---------------------------------------------------------------------
+- Implemented plugin dependencies to be able to change plugin loading order.
+- Pass on [lead.id] when converting it into a contact (LH #86).
+- Corrected format of opportunity closing date (GH #7).
+
+Fri, Aug 14, 2009
+---------------------------------------------------------------------
+- Reviewed pccl fork and [fat_free_issues] plugin.
+
+Thu, Aug 13, 2009
+---------------------------------------------------------------------
+- Added user search and pagination to Admin/Users.
+
+Wed, Aug 12, 2009
+---------------------------------------------------------------------
+- Adding search and pagination to Admin/Users.
+
+Tue, Aug 11, 2009
+---------------------------------------------------------------------
+- Installed [Highline] gem in vendor/gems for [rake crm:setup:admin] task.
+- Implemented [rake crm:setup:admin] task to create admin user.
+
+Sat, Aug 8, 2009
+---------------------------------------------------------------------
+- Added :before_destroy filters for User model.
+- Implemented deleting users in Admin interface.
+- Refactored flash messages to set notice/warning class on the fly.
+
+Wed, Aug 5, 2009
+---------------------------------------------------------------------
+- Added confirmation when deleting an user (Admin/Users/Delete).
+
+Tue, Aug 4, 2009
+---------------------------------------------------------------------
+- Upgraded [acts_as_commentable] plugin for Ruby 1.9 compatibility.
+- Updated tab settings to allow Fat Free CRM to run from a subdirectory (thanks, okyada!).
+- Updated [rake crm:settings:load] task to ensure Rails 2.3.3 compatibility.
+- Implemented Admin > [Edit User] form.
+
+Mon, Aug 3, 2009
+---------------------------------------------------------------------
+- Implemented Admin > [Create User] form.
+- Include all application helpers except the ones in /admin/helpers subdirectory (GH #5).
+- Make sure editing assets doesn't change asset owner (LH #79).
+- Implemented [Suspend] and [Reactivate] when managing users.
+- Prevent suspended user from logging in.
+
+Sun, Aug 2, 2009
+---------------------------------------------------------------------
+- Updated authentication to allow creating users with blank passwords.
+
+Sat, Aug 1, 2009
+---------------------------------------------------------------------
+- More work on Admin/Users: added list of users and [Create User] form.
+
+Fri, Jul 31, 2009
+---------------------------------------------------------------------
+- Added [suspended_at] to User model, fixed typo (LH #81).
+
+Thu, Jul 30, 2009
+---------------------------------------------------------------------
+- Fixed ActionMailer password reset issue (thanks, James!).
+- Use truncate() instead of shorten() for multibyte chars (thanks, Dima!).
+- Increased the size of the textarea when adding notes (LH #80).
+
+Wed, Jul 29, 2009
+---------------------------------------------------------------------
+- More work on building the Admin infrastructure.
+
+Tue, Jul 28, 2009
+---------------------------------------------------------------------
+- Building Admin infrastructure.
+
+Mon, Jul 27, 2009
+---------------------------------------------------------------------
+- Dropped open_id related tables, added [admin] flag to [users] table.
+
+Sun, Jul 26, 2009
+---------------------------------------------------------------------
+- Added timezone support.
+
+Fri, Jul 24, 2009
+---------------------------------------------------------------------
+- Fixed a typo that affected individual permissions (thanks, Guillermo!)
+- Refactored password reset controller and related views.
+- Merged in Spanish translation from chillicoder/master (thanks, Martin!).
+- Release 0.9.5.
+
+Thu, Jul 23, 2009
+---------------------------------------------------------------------
+- Made UUID support optional (affects MySQL v5+ users only).
+- Removed task-specific flash area; changed to use generic flash messages instead.
+- Store current user in the class to make it easier to access it from observers.
+- Removed password length restriction to allow blank passwords.
+
+Tue, Jul 21, 2009
+---------------------------------------------------------------------
+- Upgraded HAML/SASS to version 2.2.2 (Powerful Penny) and made it a plugin.
+- Ruby 1.9.1 compatibility fixes.
+
+Mon, Jul 20, 2009
+---------------------------------------------------------------------
+- Happy birthday, Lana!
+- Annotated models for schema version #19.
+- Implemented Profile > Change Password.
+- Added ability to show flash notices from RJS templates.
+- Removed [open_id_authentication] plugin since it's no longer needed.
+- First gathering at #fatfreecrm channel on irc.freenode.net (thanks, Eric!)
+
+Sun, Jul 19, 2009
+---------------------------------------------------------------------
+- Completed upgrade to Authlogic 2.1.2
+- Removed support for OpenID authentication
+
+Sat, Jul 18, 2009
+---------------------------------------------------------------------
+- Upgrading to Authlogic 2.1.2
+
+Wed, Jul 15, 2009
+---------------------------------------------------------------------
+- Moved avatars in separate directories based on who the avatar belongs to.
+- Implemented avatar_for() to encapsulate uploaded image, gravatar, and default icon.
+- Fixed Paperclip bug when :url option is a lambda and not a string.
+- Release 0.9.4.
+
+Mon, Jul 13, 2009
+---------------------------------------------------------------------
+- Finished with user avatar upload, including controller and view specs.
+
+Sun, Jul 12, 2009
+---------------------------------------------------------------------
+- Back home from Pismo Beach.
+
+Thu, Jul 9, 2009
+---------------------------------------------------------------------
+- On my way to Pismo Beach, CA.
+
+Tue, Jul 7, 2009
+---------------------------------------------------------------------
+- More tweaks for Profile > Upload Avatar form.
+
+Mon, Jul 6, 2009
+---------------------------------------------------------------------
+- Replaced [mini_magick/has_image] combo with [paperclip] plugin.
+- Installed [responds-to-parent-plugin].
+- Added [Avatar] model.
+- Implemented Ajax avatar uploads through hidden frame.
+
+Sun, Jul 5, 2009
+---------------------------------------------------------------------
+- Installed [mini_magick] gem and [has_image] plugin.
+
+Sat, Jul 4, 2009
+---------------------------------------------------------------------
+- Finished [Edit Profile] form which now updates all other page elements.
+- Use root route instead of home (thanks, Dr.Nic!)
+
+Fri, Jul 3, 2009
+---------------------------------------------------------------------
+- Added user controller and view specs.
+- Converted [Edit Profile] form to Ajax, implemented update.
+
+Wed, Jul 1, 2009
+---------------------------------------------------------------------
+- Added copyright notices (thanks, Michael!).
+- Added routes and Ajax form stubs for [Edit Profile], [Upload Avatar], and [Change Password].
+
+Tue, Jun 30, 2009
+---------------------------------------------------------------------
+- More work on user profile.
+- Applied patches to fix an issue with comments and their formatting (thanks, Eric!).
+
 Sun, Jun 28, 2009
 ---------------------------------------------------------------------
 - Another iteration on User Profiles; all users now have personal profile page.

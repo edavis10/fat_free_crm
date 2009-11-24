@@ -1,9 +1,9 @@
 ActionController::Routing::Routes.draw do |map|
 
   # The priority is based upon order of creation: first created -> highest priority.
-  map.home "",  :controller => "home", :action => "index"
+  map.root      :controller => "home", :action => "index"
   map.resource  :authentication
-  map.resources :users
+  map.resources :users, :member => { :avatar => :get, :upload_avatar => :put, :password => :get, :change_password => :put }
   map.resources :passwords
   map.resources :comments
   map.resources :tasks,         :has_many => :comments, :member => { :complete => :put }
@@ -17,6 +17,13 @@ ActionController::Routing::Routes.draw do |map|
   map.profile "profile", :controller => "users",           :action => "show"
   map.login   "login",   :controller => "authentications", :action => "new"
   map.logout  "logout",  :controller => "authentications", :action => "destroy"
+  map.admin   "admin",   :controller => "admin/users",     :action => "index"
+
+  map.namespace :admin do |admin|
+    admin.resources :users, :collection => { :search => :get, :auto_complete => :post }, :member => { :suspend => :put, :reactivate => :put, :confirm => :get }
+    admin.resources :settings
+    admin.resources :plugins
+  end
 
   # Sample of regular route:
   #   map.connect 'products/:id', :controller => 'catalog', :action => 'view'
@@ -41,12 +48,6 @@ ActionController::Routing::Routes.draw do |map|
   #     products.resources :sales, :collection => { :recent => :get }
   #   end
 
-  # Sample resource route within a namespace:
-  #   map.namespace :admin do |admin|
-  #     # Directs /admin/products/* to Admin::ProductsController (app/controllers/admin/products_controller.rb)
-  #     admin.resources :products
-  #   end
-
   # You can have the root of your site routed with map.root -- just remember to delete public/index.html.
   # map.root :controller => "welcome"
 
@@ -56,8 +57,6 @@ ActionController::Routing::Routes.draw do |map|
   # Note: These default routes make all actions in every controller accessible via GET requests. You should
   # consider removing the them or commenting them out if you're using named routes and resources.
   
-  map.connect ":controller/:action/:uuid", :uuid => /[a-f\d\-]{36}/
-  map.connect ":controller/:action/:uuid.:format", :uuid => /[a-f\d\-]{36}/
   map.connect ":controller/:action/:id"
   map.connect ":controller/:action/:id.:format"
 end

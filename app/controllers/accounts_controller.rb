@@ -1,3 +1,20 @@
+# Fat Free CRM
+# Copyright (C) 2008-2009 by Michael Dvorkin
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------------
+
 class AccountsController < ApplicationController
   before_filter :require_user
   before_filter :set_current_tab, :only => [ :index, :show ]
@@ -175,6 +192,11 @@ class AccountsController < ApplicationController
       :per_page => @current_user.pref[:accounts_per_page]
     }
 
+    # Call :get_accounts hook and return its output if any.
+    accounts = hook(:get_accounts, self, :records => records, :pages => pages)
+    return accounts.last unless accounts.empty?
+
+    # Default processing if no :get_accounts hooks are present.
     if current_query.blank?
       Account.my(records)
     else

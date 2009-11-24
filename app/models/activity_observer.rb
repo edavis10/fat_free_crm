@@ -1,10 +1,31 @@
+# Fat Free CRM
+# Copyright (C) 2008-2009 by Michael Dvorkin
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------------
+
 class ActivityObserver < ActiveRecord::Observer
   observe Account, Campaign, Contact, Lead, Opportunity, Task
   @@tasks = {}
   @@leads = {}
+  @@opportunities = {}
 
   def after_create(subject)
     log_activity(subject, :created)
+    if subject.is_a?(Opportunity) && subject.campaign && subject.stage == "won"
+      update_campaign_revenue(subject.campaign, (subject.amount || 0) - (subject.discount || 0))
+    end
   end
 
   def before_update(subject)
@@ -12,6 +33,8 @@ class ActivityObserver < ActiveRecord::Observer
       @@tasks[subject.id] = Task.find(subject.id).freeze
     elsif subject.is_a?(Lead)
       @@leads[subject.id] = Lead.find(subject.id).freeze
+    elsif subject.is_a?(Opportunity)
+      @@opportunities[subject.id] = Opportunity.find(subject.id).freeze
     end
   end
 
@@ -28,6 +51,16 @@ class ActivityObserver < ActiveRecord::Observer
       if original && original.status != "rejected" && subject.status == "rejected"
         return log_activity(subject, :rejected)
       end
+    elsif subject.is_a?(Opportunity)
+      original = @@opportunities.delete(subject.id)
+      if original
+        if original.stage != "won" && subject.stage == "won"    # :other to :won -- add to total campaign revenue.
+          update_campaign_revenue(subject.campaign, (subject.amount || 0) - (subject.discount || 0))
+          return log_activity(subject, :won)
+        elsif original.stage == "won" && subject.stage != "won" # :won to :other -- substract from total campaign revenue.
+          update_campaign_revenue(original.campaign, -((original.amount || 0) - (original.discount || 0)))
+        end
+      end
     end
     log_activity(subject, :updated)
   end
@@ -38,10 +71,12 @@ class ActivityObserver < ActiveRecord::Observer
 
   private
   def log_activity(subject, action)
-    authentication = Authentication.find
-    if authentication
-      current_user = authentication.record
-      Activity.log(current_user, subject, action) if current_user
-    end
+    current_user = User.current_user
+    Activity.log(current_user, subject, action) if current_user
   end
+
+  def update_campaign_revenue(campaign, revenue)
+    campaign.update_attribute(:revenue, (campaign.revenue || 0) + revenue) if campaign
+  end
+
 end

@@ -1,3 +1,20 @@
+# Fat Free CRM
+# Copyright (C) 2008-2009 by Michael Dvorkin
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------------
+
 class LeadsController < ApplicationController
   before_filter :require_user
   before_filter :get_data_for_sidebar, :only => :index
@@ -83,6 +100,8 @@ class LeadsController < ApplicationController
         if called_from_index_page?
           @leads = get_leads
           get_data_for_sidebar
+        else
+          get_data_for_sidebar(:campaign)
         end
         format.js   # create.js.rjs
         format.xml  { render :xml => @lead, :status => :created, :location => @lead }
@@ -101,7 +120,7 @@ class LeadsController < ApplicationController
 
     respond_to do |format|
       if @lead.update_with_permissions(params[:lead], params[:users])
-        get_data_for_sidebar if called_from_index_page?
+        update_sidebar
         format.js
         format.xml  { head :ok }
       else
@@ -141,7 +160,7 @@ class LeadsController < ApplicationController
     @users = User.except(@current_user).all
     @account = Account.new(:user => @current_user, :name => @lead.company, :access => "Lead")
     @accounts = Account.my(@current_user).all(:order => "name")
-    @opportunity = Opportunity.new(:user => @current_user, :access => "Lead", :stage => "prospecting")
+    @opportunity = Opportunity.new(:user => @current_user, :access => "Lead", :stage => "prospecting", :campaign => @lead.campaign, :source => @lead.source)
     if params[:previous] =~ /(\d+)\z/
       @previous = Lead.my(@current_user).find($1)
     end
@@ -159,11 +178,12 @@ class LeadsController < ApplicationController
     @users = User.except(@current_user).all
     @account, @opportunity, @contact = @lead.promote(params)
     @accounts = Account.my(@current_user).all(:order => "name")
+    @stage = Setting.as_hash(:opportunity_stage)
 
     respond_to do |format|
       if @account.errors.empty? && @opportunity.errors.empty? && @contact.errors.empty?
         @lead.convert
-        get_data_for_sidebar if called_from_index_page?
+        update_sidebar
         format.js   # promote.js.rjs
         format.xml  { head :ok }
       else
@@ -182,7 +202,7 @@ class LeadsController < ApplicationController
   def reject
     @lead = Lead.my(@current_user).find(params[:id])
     @lead.reject if @lead
-    get_data_for_sidebar if called_from_index_page?
+    update_sidebar
 
     respond_to do |format|
       format.html { flash[:notice] = "#{@lead.full_name} has beed rejected."; redirect_to(leads_path) }
@@ -266,6 +286,11 @@ class LeadsController < ApplicationController
       :per_page => @current_user.preference[:leads_per_page]
     }
 
+    # Call :get_leads hook and return its output if any.
+    leads = hook(:get_leads, self, :records => records, :pages => pages)
+    return leads.last unless leads.empty?
+
+    # Default processing if no :get_leads hooks are present.
     if session[:filter_by_lead_status]
       filtered = session[:filter_by_lead_status].split(",")
       current_query.blank? ? Lead.my(records).only(filtered) : Lead.my(records).only(filtered).search(current_query)
@@ -286,6 +311,7 @@ class LeadsController < ApplicationController
         end
       else                                        # Called from related asset.
         self.current_page = 1                     # Reset current page to 1 to make sure it stays valid.
+        @campaign = @lead.campaign                # Reload lead's campaign if any.
       end                                         # Render destroy.js.rjs
     else # :html destroy
       self.current_page = 1
@@ -295,13 +321,26 @@ class LeadsController < ApplicationController
   end
 
   #----------------------------------------------------------------------------
-  def get_data_for_sidebar
-    @lead_status_total = { :all => Lead.my(@current_user).count, :other => 0 }
-    Setting.lead_status.keys.each do |key|
-      @lead_status_total[key] = Lead.my(@current_user).count(:conditions => [ "status=?", key.to_s ])
-      @lead_status_total[:other] -= @lead_status_total[key]
+  def get_data_for_sidebar(related = false)
+    if related
+      instance_variable_set("@#{related}", @lead.send(related)) if called_from_landing_page?(related.to_s.pluralize)
+    else
+      @lead_status_total = { :all => Lead.my(@current_user).count, :other => 0 }
+      Setting.lead_status.keys.each do |key|
+        @lead_status_total[key] = Lead.my(@current_user).count(:conditions => [ "status=?", key.to_s ])
+        @lead_status_total[:other] -= @lead_status_total[key]
+      end
+      @lead_status_total[:other] += @lead_status_total[:all]
     end
-    @lead_status_total[:other] += @lead_status_total[:all]
+  end
+
+  #----------------------------------------------------------------------------
+  def update_sidebar
+    if called_from_index_page?
+      get_data_for_sidebar
+    else
+      get_data_for_sidebar(:campaign)
+    end
   end
 
 end
