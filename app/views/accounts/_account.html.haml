@@ -10,15 +10,15 @@
     = link_to_delete(account) + "&nbsp;"
 
   .indent
-    = link_to(account.name, account) << " &ndash; "
+    = link_to(h(account.name), account) << " &ndash; "
     %tt
       = account.location << ", " unless account.location.blank?
-      == added #{time_ago_in_words(account.created_at)} ago by 
-      == #{account.user.id == @current_user.id ? "me" : account.user.full_name}
+      = t(:added_by, :time_ago => time_ago_in_words(account.created_at), :user => (account.user.id == @current_user.id ? t(:me) : h(account.user.full_name)))
     - unless @current_user.preference[:accounts_outline] == "brief"
       %dt
         = link_to(account.website, account.website.to_url) << " | " if account.website?
-        = "phone: " << (account.toll_free_phone || account.phone) << " | " if account.toll_free_phone? || account.phone?
-        = pluralize(account.contacts.count, "contact") << " | "
-        = pluralize(account.opportunities.count, "opportunity")
+        = link_to(account.email, "mailto:" << account.email.to_s) << " | " if account.email?
+        = t(:phone_small) << ": " << (account.toll_free_phone || account.phone) << " | " if account.toll_free_phone? || account.phone?
+        = t('pluralize.contact', account.contacts.count) << " | "
+        = t('pluralize.opportunity', account.opportunities.count)
       = hook(:account_bottom, self, :account => account)

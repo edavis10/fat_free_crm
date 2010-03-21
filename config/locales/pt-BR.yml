@@ -1,49 +1,81 @@
-"es-MX":
-# action_view/locale/en.yml
+pt-BR:
+  date:
+    formats:
+      # Use the strftime parameters for formats.
+      # When no format has been given, it uses default.
+      # You can provide other formats here if you like!
+      default: "%d-%m-%Y"
+      short: "%d de %B"
+      long: "%d de %B de %Y"
+      
+    day_names: [Domingo, Segunda, Terça, Quarta, Quinta, Sexta, Sábado]
+    abbr_day_names: [Dom, Seg, Ter, Qua, Qui, Sex, Sáb]
+      
+    # Don't forget the nil at the beginning; there's no such thing as a 0th month
+    month_names: [~, Janeiro, Fevereiro, Março, Abril, Maio, Junho, Julho, Agosto, Setembro, Outubro, Novembro, Dezembro]
+    abbr_month_names: [~, Jan, Fev, Mar, Abr, Mai, Jun, Jul, Ago, Set, Out, Nov, Dez]
+    # Used in date_select and datime_select.
+    order: [ :year, :month, :day ]
+
+  time:
+    formats:
+      default: "%A, %d de %B de %Y, %H:%M hs"
+      short: "%d/%m, %H:%M hs"
+      long: "%A, %d de %B de %Y, %H:%M hs"
+    am: "am"
+    pm: "pm"
+      
+# Used in array.to_sentence.
+  support:
+    array:
+      words_connector: ", "
+      two_words_connector: " e "
+      last_word_connector: ", e "
+
   number:
     # Used in number_with_delimiter()
     # These are also the defaults for 'currency', 'percentage', 'precision', and 'human'
     format:
       # Sets the separator between the units, for more precision (e.g. 1.0 / 2.0 == 0.5)
-      separator: "."
+      separator: ","
       # Delimets thousands (e.g. 1,000,000 is a million) (always in groups of three)
-      delimiter: ","
+      delimiter: "."
       # Number of decimals, behind the separator (the number 1 with a precision of 2 gives: 1.00)
       precision: 3
-      
+  
     # Used in number_to_currency()
     currency:
       format:
         # Where is the currency sign? %u is the currency unit, %n the number (default: $5.00)
-        format: "%u%n"
-        unit: "$"
+        format: "%u %n"
+        unit: "R$"
         # These three are to override number.format and are optional
-        separator: "."
-        delimiter: ","
+        separator: ","
+        delimiter: "."
         precision: 2
-        
+  
     # Used in number_to_percentage()
     percentage:
       format:
         # These three are to override number.format and are optional
         # separator: 
-        delimiter: ""
+        delimiter: "."
         # precision: 
-        
+  
     # Used in number_to_precision()
     precision:
       format:
         # These three are to override number.format and are optional
         # separator:
-        delimiter: ""
+        delimiter: "."
         # precision:
-        
+  
     # Used in number_to_human_size()
     human:
       format:
         # These three are to override number.format and are optional
         # separator: 
-        delimiter: ""
+        delimiter: "."
         precision: 1
       storage_units:
         # Storage units output formatting.
@@ -57,11 +89,11 @@
           mb: "MB"
           gb: "GB"
           tb: "TB"
-
+  
   # Used in distance_of_time_in_words(), distance_of_time_in_words_to_now(), time_ago_in_words()
   datetime:
     distance_in_words:
-      half_a_minute: "hace medio minuto"
+      half_a_minute: "meio minuto"
       less_than_x_seconds:
         one:   "menos de 1 segundo"
         other: "menos de {{count}} segundos"
@@ -69,33 +101,33 @@
         one:   "1 segundo"
         other: "{{count}} segundos"
       less_than_x_minutes:
-        one:   "menos de un minuto"
+        one:   "menos de um minuto"
         other: "menos de {{count}} minutos"
       x_minutes:
         one:   "1 minuto"
         other: "{{count}} minutos"
       about_x_hours:
-        one:   "cerca de 1 hora"
-        other: "cerca de {{count}} horas"
+        one:   "aproximadamente 1 hora"
+        other: "aproximadamente {{count}} horas"
       x_days:
-        one:   "1 día"
-        other: "{{count}} días"
+        one:   "1 dia"
+        other: "{{count}} dias"
       about_x_months:
-        one:   "cerca de 1 mes"
-        other: "cerca de {{count}} meses"
+        one:   "aproximadamente 1 mês"
+        other: "aproximadamente {{count}} meses"
       x_months:
-        one:   "1 mes"
+        one:   "1 mês"
         other: "{{count}} meses"
       about_x_years:
-        one:   "cerca de 1 año"
-        other: "cerca de {{count}} años"
+        one:   "aproximadamente 1 ano"
+        other: "aproximadamente {{count}} anos"
       over_x_years:
-        one:   "over 1 year"
-        other: "over {{count}} years"
+        one:   "mais de 1 ano"
+        other: "mais de {{count}} anos"
     prompts:
-      year:   "Año"
-      month:  "Mes"
-      day:    "Día"
+      year:   "Ano"
+      month:  "Mês"
+      day:    "Dia"
       hour:   "Hora"
       minute: "Minuto"
       second: "Segundos"
@@ -104,72 +136,37 @@
     errors:
       template:
         header:
-          one:    "1 error prohibited this {{model}} from being saved"
-          other:  "{{count}} errors prohibited this {{model}} from being saved"
+          one: "model não pode ser salvo: 1 erro"
+          other: "model não pode ser salvo: {{count}} erros."
         # The variable :count is also available
-        body: "There were problems with the following fields:"
-
-# active_support/locale
-  date:
-    formats:
-      # Use the strftime parameters for formats.
-      # When no format has been given, it uses default.
-      # You can provide other formats here if you like!
-      default: "%Y-%m-%d"
-      short: "%b %d"
-      long: "%B %d, %Y"
-      
-    day_names: [Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday]
-    abbr_day_names: [Sun, Mon, Tue, Wed, Thu, Fri, Sat]
-      
-    # Don't forget the nil at the beginning; there's no such thing as a 0th month
-    month_names: [~, January, February, March, April, May, June, July, August, September, October, November, December]
-    abbr_month_names: [~, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec]
-    # Used in date_select and datime_select.
-    order: [ :year, :month, :day ]
-
-  time:
-    formats:
-      default: "%a, %d %b %Y %H:%M:%S %z"
-      short: "%d %b %H:%M"
-      long: "%B %d, %Y %H:%M"
-    am: "am"
-    pm: "pm"
-      
-# Used in array.to_sentence.
-  support:
-    array:
-      words_connector: ", "
-      two_words_connector: " and "
-      last_word_connector: ", and "
-
-# active_record/locale
-  activerecord:
-    errors:
+        body: "Por favor, verifique os seguintes campos:"
       # The values :model, :attribute and :value are always available for interpolation
       # The value :count is available when applicable. Can be used for pluralization.
       messages:
-        inclusion: "is not included in the list"
-        exclusion: "is reserved"
-        invalid: "is invalid"
-        confirmation: "doesn't match confirmation"
-        accepted: "must be accepted"
-        empty: "can't be empty"
-        blank: "can't be blank"
-        too_long: "is too long (maximum is {{count}} characters)"
-        too_short: "is too short (minimum is {{count}} characters)"
-        wrong_length: "is the wrong length (should be {{count}} characters)"
-        taken: "has already been taken"
-        not_a_number: "is not a number"
-        greater_than: "must be greater than {{count}}"
-        greater_than_or_equal_to: "must be greater than or equal to {{count}}"
-        equal_to: "must be equal to {{count}}"
-        less_than: "must be less than {{count}}"
-        less_than_or_equal_to: "must be less than or equal to {{count}}"
-        odd: "must be odd"
-        even: "must be even"
+        inclusion: "não está incluso na lista"
+        exclusion: "não está disponível"
+        invalid: "não é válido"
+        confirmation: "não está de acordo com a confirmação"
+        accepted: "precisa ser aceito"
+        empty: "não pode ficar vazio"
+        blank: "não pode ficar vazio"
+        too_long: "é muito longo (máximo: {{count}} caracteres)"
+        too_short: "é muito curto (mínimon: {{count}} caracteres)"
+        wrong_length: "deve ter {{count}} caracteres"
+        taken: "não está disponível"
+        not_a_number: "não é um número"
+        greater_than: "precisa ser maior do que {{count}}"
+        greater_than_or_equal_to: "precisa ser maior ou igual a {{count}}"
+        equal_to: "precisa ser igual a {{count}}"
+        less_than: "precisa ser menor do que {{count}}"
+        less_than_or_equal_to: "precisa ser menor ou igual a {{count}}"
+        odd: "precisa ser ímpar"
+        even: "precisa ser par"
+        greater_than_start_date: "deve ser maior que a data inicial"
+        not_same_project: "não pertence ao mesmo projeto"
+        circular_dependency: "Esta relação geraria uma dependência circular"
         # Append your own errors here or at the model/attributes scope.
-
+    
       # You can define own errors for models or model attributes.
       # The values :model, :attribute and :value are always available for interpolation.
       #
@@ -183,7 +180,7 @@
       # Will define custom blank validation message for User model and 
       # custom blank validation message for login attribute of User model.
       #models:
-        
+    
     # Translate model names. Used in Model.human_name().
     #models:
       # For example,
@@ -196,4 +193,5 @@
       #   user:
       #     login: "Handle"
       # will translate User attribute "login" as "Handle"
-
+    
+    

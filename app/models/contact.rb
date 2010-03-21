@@ -1,5 +1,5 @@
 # Fat Free CRM
-# Copyright (C) 2008-2009 by Michael Dvorkin
+# Copyright (C) 2008-2010 by Michael Dvorkin
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -16,7 +16,7 @@
 #------------------------------------------------------------------------------
 
 # == Schema Information
-# Schema version: 23
+# Schema version: 26
 #
 # Table name: contacts
 #
@@ -40,12 +40,12 @@
 #  linkedin    :string(128)
 #  facebook    :string(128)
 #  twitter     :string(128)
-#  address     :string(255)
 #  born_on     :date
 #  do_not_call :boolean(1)      not null
 #  deleted_at  :datetime
 #  created_at  :datetime
 #  updated_at  :datetime
+#  background_info  :string(255)
 #
 class Contact < ActiveRecord::Base
   belongs_to  :user
@@ -57,33 +57,28 @@ class Contact < ActiveRecord::Base
   has_many    :opportunities, :through => :contact_opportunities, :uniq => true, :order => "opportunities.id DESC"
   has_many    :tasks, :as => :asset, :dependent => :destroy, :order => 'created_at DESC'
   has_many    :activities, :as => :subject, :order => 'created_at DESC'
+  has_one     :business_address, :dependent => :destroy, :as => :addressable, :class_name => "Address", :conditions => "address_type='Business'"
 
-  named_scope :created_by, lambda { |user| { :conditions => "user_id = #{user.id}" } }
-  named_scope :assigned_to, lambda { |user| { :conditions => "assigned_to = #{user.id}" } }
+  accepts_nested_attributes_for :business_address, :allow_destroy => true
+
+  named_scope :created_by, lambda { |user| { :conditions => [ "user_id = ?", user.id ] } }
+  named_scope :assigned_to, lambda { |user| { :conditions => ["assigned_to = ?", user.id ] } }
 
   simple_column_search :first_name, :last_name, :escape => lambda { |query| query.gsub(/[^\w\s\-\.']/, "").strip }
-
   uses_user_permissions
   acts_as_commentable
   acts_as_paranoid
+  sortable :by => [ "first_name ASC",  "last_name ASC", "created_at DESC", "updated_at DESC" ], :default => "created_at DESC"
 
-  validates_presence_of :first_name, :message => "^Please specify first name."
-  validates_presence_of :last_name, :message => "^Please specify last name."
+  validates_presence_of :first_name, :message => :missing_first_name
+  validates_presence_of :last_name, :message => :missing_last_name
   validate :users_for_shared_access
-
-  SORT_BY = {
-    "first name"   => "contacts.first_name ASC",
-    "last name"    => "contacts.last_name ASC",
-    "date created" => "contacts.created_at DESC",
-    "date updated" => "contacts.updated_at DESC"
-  }
 
   # Default values provided through class methods.
   #----------------------------------------------------------------------------
-  def self.per_page ;  20                         ; end
-  def self.outline  ;  "long"                     ; end
-  def self.sort_by  ;  "contacts.created_at DESC" ; end
-  def self.first_name_position ;  "before"        ; end
+  def self.per_page ; 20                  ; end
+  def self.outline  ; "long"              ; end
+  def self.first_name_position ; "before" ; end
 
   #----------------------------------------------------------------------------
   def full_name(format = nil)
@@ -121,10 +116,12 @@ class Contact < ActiveRecord::Base
       :assigned_to => params[:account][:assigned_to],
       :access      => params[:access]
     }
-    %w(first_name last_name title source email alt_email phone mobile blog linkedin facebook twitter address do_not_call).each do |name|
+    %w(first_name last_name title source email alt_email phone mobile blog linkedin facebook twitter do_not_call background_info).each do |name|
       attributes[name] = model.send(name.intern)
     end
+    
     contact = Contact.new(attributes)
+    contact.business_address = Address.new(:street1 => model.business_address.street1, :street2 => model.business_address.street2, :city => model.business_address.city, :state => model.business_address.state, :zipcode => model.business_address.zipcode, :country => model.business_address.country, :full_address => model.business_address.full_address, :address_type => "Business") unless model.business_address.nil?
 
     # Save the contact only if the account and the opportunity have no errors.
     if account.errors.empty? && opportunity.errors.empty?
@@ -144,7 +141,7 @@ class Contact < ActiveRecord::Base
   # Make sure at least one user has been selected if the contact is being shared.
   #----------------------------------------------------------------------------
   def users_for_shared_access
-    errors.add(:access, "^Please specify users to share the contact with.") if self[:access] == "Shared" && !self.permissions.any?
+    errors.add(:access, :share_contact) if self[:access] == "Shared" && !self.permissions.any?
   end
 
 end

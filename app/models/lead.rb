@@ -1,5 +1,5 @@
 # Fat Free CRM
-# Copyright (C) 2008-2009 by Michael Dvorkin
+# Copyright (C) 2008-2010 by Michael Dvorkin
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -16,7 +16,7 @@
 #------------------------------------------------------------------------------
 
 # == Schema Information
-# Schema version: 23
+# Schema version: 26
 #
 # Table name: leads
 #
@@ -40,12 +40,12 @@
 #  linkedin    :string(128)
 #  facebook    :string(128)
 #  twitter     :string(128)
-#  address     :string(255)
 #  rating      :integer(4)      default(0), not null
 #  do_not_call :boolean(1)      not null
 #  deleted_at  :datetime
 #  created_at  :datetime
 #  updated_at  :datetime
+#  background_info  :string(255)
 #
 class Lead < ActiveRecord::Base
   belongs_to  :user
@@ -54,40 +54,34 @@ class Lead < ActiveRecord::Base
   has_one     :contact, :dependent => :nullify # On destroy keep the contact, but nullify its lead_id
   has_many    :tasks, :as => :asset, :dependent => :destroy, :order => 'created_at DESC'
   has_many    :activities, :as => :subject, :order => 'created_at DESC'
+  has_one     :business_address, :dependent => :destroy, :as => :addressable, :class_name => "Address", :conditions => "address_type='Business'"
 
+  accepts_nested_attributes_for :business_address, :allow_destroy => true
+  
   named_scope :only, lambda { |filters| { :conditions => [ "status IN (?)" + (filters.delete("other") ? " OR status IS NULL" : ""), filters ] } }
   named_scope :converted, :conditions => "status='converted'"
   named_scope :for_campaign, lambda { |id| { :conditions => [ "campaign_id=?", id ] } }
-  named_scope :created_by, lambda { |user| { :conditions => "user_id = #{user.id}" } }
-  named_scope :assigned_to, lambda { |user| { :conditions => "assigned_to = #{user.id}" } }
+  named_scope :created_by, lambda { |user| { :conditions => [ "user_id = ?" , user.id ] } }
+  named_scope :assigned_to, lambda { |user| { :conditions => ["assigned_to = ? " , user.id ] } }
 
   simple_column_search :first_name, :last_name, :company, :escape => lambda { |query| query.gsub(/[^\w\s\-\.']/, "").strip }
   uses_user_permissions
   acts_as_commentable
   acts_as_paranoid
+  sortable :by => [ "first_name ASC", "last_name ASC", "company ASC", "rating DESC", "created_at DESC", "updated_at DESC" ], :default => "created_at DESC"
 
-  validates_presence_of :first_name, :message => "^Please specify first name."
-  validates_presence_of :last_name, :message => "^Please specify last name."
+  validates_presence_of :first_name, :message => :missing_first_name
+  validates_presence_of :last_name, :message => :missing_last_name
   validate :users_for_shared_access
 
   after_create  :increment_leads_count
   after_destroy :decrement_leads_count
 
-  SORT_BY = {
-    "first name"   => "leads.first_name ASC",
-    "last name"    => "leads.last_name ASC",
-    "company"      => "leads.company ASC",
-    "rating"       => "leads.rating DESC",
-    "date created" => "leads.created_at DESC",
-    "date updated" => "leads.updated_at DESC"
-  }
-
   # Default values provided through class methods.
   #----------------------------------------------------------------------------
-  def self.per_page ;  20                      ; end
-  def self.outline  ;  "long"                  ; end
-  def self.sort_by  ;  "leads.created_at DESC" ; end
-  def self.first_name_position ;  "before"     ; end
+  def self.per_page ; 20                  ; end
+  def self.outline  ; "long"              ; end
+  def self.first_name_position ; "before" ; end
 
   # Save the lead along with its permissions.
   #----------------------------------------------------------------------------
@@ -162,7 +156,7 @@ class Lead < ActiveRecord::Base
   # Make sure at least one user has been selected if the lead is being shared.
   #----------------------------------------------------------------------------
   def users_for_shared_access
-    errors.add(:access, "^Please specify users to share the lead with.") if self[:access] == "Shared" && !self.permissions.any?
+    errors.add(:access, :share_lead) if self[:access] == "Shared" && !self.permissions.any?
   end
 
 end

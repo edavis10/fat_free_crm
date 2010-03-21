@@ -1,5 +1,5 @@
 # Fat Free CRM
-# Copyright (C) 2008-2009 by Michael Dvorkin
+# Copyright (C) 2008-2010 by Michael Dvorkin
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -62,8 +62,8 @@ class Task < ActiveRecord::Base
   # Due date scopes.
   named_scope :due_asap,      :conditions => "due_at IS NULL AND bucket = 'due_asap'", :order => "id DESC"
   named_scope :overdue,       lambda { { :conditions => [ "due_at IS NOT NULL AND due_at < ?", Time.zone.now.midnight.utc ], :order => "id DESC" } }
-  named_scope :due_today,     lambda { { :conditions => [ "due_at = ?", Time.zone.now.midnight.utc ], :order => "id DESC" } }
-  named_scope :due_tomorrow,  lambda { { :conditions => [ "due_at = ?", Time.zone.now.midnight.tomorrow.utc ], :order => "id DESC" } }
+  named_scope :due_today,     lambda { { :conditions => [ "due_at >= ? AND due_at < ?", Time.zone.now.midnight.utc, Time.zone.now.midnight.tomorrow.utc ], :order => "id DESC" } }
+  named_scope :due_tomorrow,  lambda { { :conditions => [ "due_at >= ? AND due_at < ?", Time.zone.now.midnight.tomorrow.utc, Time.zone.now.midnight.tomorrow.utc + 1.day ], :order => "id DESC" } }
   named_scope :due_this_week, lambda { { :conditions => [ "due_at >= ? AND due_at < ?", Time.zone.now.midnight.tomorrow.utc + 1.day, Time.zone.now.next_week.utc ], :order => "id DESC" } }
   named_scope :due_next_week, lambda { { :conditions => [ "due_at >= ? AND due_at < ?", Time.zone.now.next_week.utc, Time.zone.now.next_week.end_of_week.utc + 1.day ], :order => "id DESC" } }
   named_scope :due_later,     lambda { { :conditions => [ "(due_at IS NULL AND bucket = 'due_later') OR due_at >= ?", Time.zone.now.next_week.end_of_week.utc + 1.day ], :order => "id DESC" } }
@@ -79,8 +79,8 @@ class Task < ActiveRecord::Base
   acts_as_commentable
   acts_as_paranoid
 
-  validates_presence_of :user_id
-  validates_presence_of :name, :message => "^Please specify task name."
+  validates_presence_of :user
+  validates_presence_of :name, :message => :missing_task_name
   validates_presence_of :calendar, :if => "self.bucket == 'specific_time' && !self.completed_at"
   validate              :specific_time, :unless => "self.completed_at"
 
@@ -105,6 +105,15 @@ class Task < ActiveRecord::Base
     self.user == user || self.assignee == user
   end
 
+  # Check whether the due date has specific time ignoring 23:59:59 timestamp
+  # set by Time.now.end_of_week.
+  #----------------------------------------------------------------------------
+  def at_specific_time?
+    self.due_at &&
+    (self.due_at.hour != 0 || self.due_at.min != 0 || self.due_at.sec != 0) &&
+    (self.due_at.hour != 23 && self.due_at.min != 59 && self.due_at.sec != 59)
+  end
+
   # Convert specific due_date to "due_today", "due_tomorrow", etc. bucket name.
   #----------------------------------------------------------------------------
   def computed_bucket
@@ -112,9 +121,9 @@ class Task < ActiveRecord::Base
     case
     when self.due_at < Time.zone.now.midnight
       "overdue"
-    when self.due_at == Time.zone.now.midnight
+    when self.due_at >= Time.zone.now.midnight && self.due_at < Time.zone.now.midnight.tomorrow
       "due_today"
-    when self.due_at == Time.zone.now.midnight.tomorrow
+    when self.due_at >= Time.zone.now.midnight.tomorrow && self.due_at < Time.zone.now.midnight.tomorrow + 1.day
       "due_tomorrow"
     when self.due_at >= (Time.zone.now.midnight.tomorrow + 1.day) && self.due_at < Time.zone.now.next_week
       "due_this_week"
@@ -129,7 +138,7 @@ class Task < ActiveRecord::Base
   #----------------------------------------------------------------------------
   def self.find_all_grouped(user, view)
     settings = (view == "completed" ? Setting.task_completed : Setting.task_bucket)
-    settings.inject({}) do |hash, (value, key)|
+    settings.inject({}) do |hash, key|
       hash[key] = (view == "assigned" ? assigned_by(user).send(key).pending : my(user).send(key).send(view))
       hash
     end
@@ -150,7 +159,7 @@ class Task < ActiveRecord::Base
   #----------------------------------------------------------------------------
   def self.totals(user, view = "pending")
     settings = (view == "completed" ? Setting.task_completed : Setting.task_bucket)
-    settings.inject({ :all => 0 }) do |hash, (value, key)|
+    settings.inject({ :all => 0 }) do |hash, key|
       hash[key] = (view == "assigned" ? assigned_by(user).send(key).pending.count : my(user).send(key).send(view).count)
       hash[:all] += hash[key]
       hash
@@ -174,7 +183,7 @@ class Task < ActiveRecord::Base
     when "due_later"
       Time.zone.now.midnight + 100.years
     when "specific_time"
-      self.calendar
+      self.calendar ? Time.parse(self.calendar).utc : nil
     else # due_later or due_asap
       nil
     end
@@ -190,9 +199,9 @@ class Task < ActiveRecord::Base
 
   #----------------------------------------------------------------------------
   def specific_time
-    if (self.bucket == "specific_time") && (self.calendar !~ %r[\d{2}/\d{2}/\d{4}])
-      errors.add(:calendar, "^Please specify valid date.")
-    end
+    Time.parse(self.calendar).utc if self.bucket == "specific_time"
+  rescue
+    errors.add(:calendar, :invalid_date)
   end
 
 end

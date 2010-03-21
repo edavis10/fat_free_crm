@@ -1,5 +1,5 @@
 # Fat Free CRM
-# Copyright (C) 2008-2009 by Michael Dvorkin
+# Copyright (C) 2008-2010 by Michael Dvorkin
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -45,6 +45,9 @@ class Activity < ActiveRecord::Base
   } }
 
   validates_presence_of :user, :subject
+
+  ASSETS = %w(all tasks campaigns leads accounts contacts opportunities).inject([]) { |arr, asset| arr << [ asset, I18n.t(asset) ] }
+  DURATION = %w(one_hour one_day two_days one_week two_weeks one_month).inject([]) { |arr, duration| arr << [ duration, I18n.t(duration) ] }
 
   #----------------------------------------------------------------------------
   def self.log(user, subject, action)

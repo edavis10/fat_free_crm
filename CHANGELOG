@@ -4,12 +4,189 @@ It does not matter how slowly you go as long as you do not stop.
 First they ignore you, then they laugh at you, then they fight you,
 then you win. –- Mahatma Gandhi
 
+Tue, Mar 9, 2010
+---------------------------------------------------------------------
+- Check if new [background_info] setting is properly loaded.
+- Merged in dropdown calendar localization patches (thanks, Yura!)
+- Updated list of contributors.
+- Version 0.9.10
+
+Fri, Feb 26, 2010
+---------------------------------------------------------------------
+- More work on to support scheduling tasks with specific time deadline.
+
+Thu, Feb 25, 2010
+---------------------------------------------------------------------
+- Refactored compound address code to support field hints.
+- Added French locale (thanks, Cédric!)
+
+Wed, Feb 24, 2010
+---------------------------------------------------------------------
+- Added new hook hook in user profile template (thanks, Jose Luis!)
+
+Sun, Feb 21, 2010
+---------------------------------------------------------------------
+- Added :background_info option to Settings making it optional
+- Refactored background info in forms and sidebar views
+- Fixed fixtures and factories for the new Address model
+
+Fri, Feb 19, 2010
+---------------------------------------------------------------------
+- Added support for creating tasks with specific time deadline (thanks, Yura!)
+
+Wed, Feb 17, 2010
+---------------------------------------------------------------------
+- Added support for compound addresses (thanks, Jose Luis!)
+- Fixed for :quote_ident issue with Postgres (thanks, Matt!)
+- Added missing translations to the rest of locale files.
+
+Tue, Feb 16, 2010
+---------------------------------------------------------------------
+- Added localization support for dropdown calendar (thanks, Yura!)
+
+Wed, Feb 10, 2010
+---------------------------------------------------------------------
+- Added background info field to all major models (thanks, Jose Luis!)
+- Added hook to sidebar index template (thanks, Jose Luis!)
+
+Tue, Feb 9, 2010
+---------------------------------------------------------------------
+- Default permissions are now configurable in settings.yml (thanks, Jose Luis!)
+- More localization tweaks for date formats and tasks (thanks, Kamil and Yura!)
+- Minor refactoring.
+
+Sun, Feb 7, 2010
+---------------------------------------------------------------------
+- Updated Russian locale files (thanks, Roman!)
+- Updated task editing to support localization (thanks, Yura!)
+- Added email attribute to Accounts -- run rake db:migrate (thanks, Jose Luis!)
+- Updated README to mention http://demo.fatfreecrm.com
+
+Thu, Feb 4, 2010
+---------------------------------------------------------------------
+- Fixed few i18n omissions in locale files.
+- Added support for editing and deleting notes (thanks, Jose Luis!)
+
+Tue, Feb 2, 2010
+---------------------------------------------------------------------
+- Added Polish translation (thanks, Kamil!)
+
+Wed, Jan 27, 2010
+---------------------------------------------------------------------
+- Fixed task time zone specs (thanks, Tom!)
+
+Mon, Jan 25, 2010
+---------------------------------------------------------------------
+- Small tweak to better support Heroku deployments (thanks, Ryan!)
+
+Tue, Jan 19, 2010
+---------------------------------------------------------------------
+- Updated Russian translation (thanks, Roman!)
+
+Tue, Jan 12, 2010
+---------------------------------------------------------------------
+- Pulled remaining English strings out of JavaScript (thanks, Gavin!)
+- Added missing message to locale files.
+
+Mon, Jan 11, 2010
+---------------------------------------------------------------------
+- Added Spanish translation (thanks, Beatriz!)
+- Fixed text encoding issues with Ruby 1.9/MySQL and HAML (thanks, Gavin!)
+
+Wed, Jan 7, 2010
+---------------------------------------------------------------------
+- Added :per_user_locale setting (default is false).
+- Added some CSS eye candy (drop shadows and options links).
+- Version 0.9.9b
+
+Wed, Jan 6, 2010
+---------------------------------------------------------------------
+- Updated Thai and Portuguese language translations.
+
+Mon, Jan 4, 2010
+---------------------------------------------------------------------
+- Implemented REST API for fetching asset notes (thanks, Adrian!)
+
+Sun, Jan 3, 2010
+---------------------------------------------------------------------
+- Return stringified hook data when called from within templates, and the actual data otherwise.
+
+Thu, Dec 31, 2009
+---------------------------------------------------------------------
+- Version 0.9.9a -- Happy New Year!
+- Added [rake crm:settings:show] task.
+- Minor fixes.
+
+Wed, Dec 30, 2009
+---------------------------------------------------------------------
+- More Ruby 1.9 compatibility fixes: all specs pass.
+
+Tue, Dec 29, 2009
+---------------------------------------------------------------------
+- Fixed Ruby 1.9 compatibility issues with I18n.t (thanks, Gavin!)
+- Fixed rendering of callback hooks to be compatible with Ruby 1.9.
+- Fixed password reset submission form (thanks, Roman!)
+
+Mon, Dec 28, 2009
+---------------------------------------------------------------------
+- XSS cleanup across views and models (thanks, Louis!)
+- Refactoring permissions templates (thanks, Rit!)
+- Updated README file.
+- Version 0.9.9 (yay!)
+
+Sat, Dec 19, 2009
+---------------------------------------------------------------------
+- Fixed deprecation warning when adding a new comment.
+- Fixed Apache/Passenger issue of not being able to load tab settings.
+- Merged in I18n branch: Fat Free CRM could be easily localized now by dropping in config/locales file.
+- Added exception handling and custom 500 status code template.
+
+Mon, Dec 14, 2009
+---------------------------------------------------------------------
+- Make sure no activity records are left behind when model record gets deleted from the database.
+
+Sun, Dec 13, 2009
+---------------------------------------------------------------------
+- Fixed broken sidebar search in Admin/Users.
+- Refactored sidebar rendering to explicitly check if template file exists.
+
+Sat, Dec 12, 2009
+---------------------------------------------------------------------
+- Upgraded [simple_column_search] plugin that adds search support for Postgres.
+- More I18n tweaks in views.
+- Metallica show at HP Pavilion in San Jose!
+
+Sun, Nov 29, 2009
+---------------------------------------------------------------------
+- Added optional PLUGIN=plugin parameter to "rake crm:settings:load" task.
+- Sorted locale keys, synced up English, Portuguese, and Russian locale files.
+
+Tue, Nov 24, 2009
+---------------------------------------------------------------------
+- Happy birthday, Fat Free CRM is one year old!
+
+Wed, Nov 18, 2009
+---------------------------------------------------------------------
+- Added Thai language translation (thanks, Apirak!)
 
 Mon, Nov 16, 2009
 ---------------------------------------------------------------------
 - Streamlined CSS styles to fix text wrapping.
 - Added explicit CSS value to fix tabs height (thanks, Apirak!)
 - Fixed time calculations for dashboard activities.
+
+Thu, Nov 12, 2009
+---------------------------------------------------------------------
+- Restructured settings to take advantage of locale.
+- NOTE: re-run crm:settings:load
+
+Wed, Nov 11, 2009
+---------------------------------------------------------------------
+- Moved hardcoded setting values from config/settings.yml to locale.
+
+Mon, Nov 9, 2009
+---------------------------------------------------------------------
+- Merged with lanadv/i18n branch (thanks, Lana!)
 
 Fri, Nov 6, 2009
 ---------------------------------------------------------------------
@@ -27,6 +204,10 @@ Wed, Nov 4, 2009
 - Correctly set opportunity campaign and source when converting a lead (LH #119).
 - Show correct campaign name and source when adding a lead from campaign landing page.
 - Update lead counters when reassigning leads between campaigns (LH #117).
+
+Sun, Nov 1, 2009
+---------------------------------------------------------------------
+- Implemented I18n for options across all models.
 
 Sat, Oct 31, 2009
 ---------------------------------------------------------------------
@@ -58,6 +239,8 @@ Tue, Oct 20, 2009
 ---------------------------------------------------------------------
 - Added Language option stubs to user's profile.
 - Disabled tab highlighting when showing user's profile.
+- Include all Fat Free CRM modules from Rails initializer.
+- Added FatFreeCRM::I18n module.
 
 Sun, Oct 18, 2009
 ---------------------------------------------------------------------
