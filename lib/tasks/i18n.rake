@@ -1,5 +1,7 @@
 # add task for getting missed locales for a lang
 $KCODE = 'UTF8'
+
+begin
 require 'ya2yaml'
 
 namespace :i18n do
@@ -100,4 +102,8 @@ namespace :i18n do
     end
   end
 
+end
+
+rescue LoadError
+  puts "ERROR: ya2yaml is not installed"
 end
